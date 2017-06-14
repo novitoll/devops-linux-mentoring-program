@@ -2,7 +2,7 @@
 
 set -e
 
-declare -a pkgs=("httpd", "mariadb-server", "mariadb", "php", "php-mysql")
+declare -a pkgs=("httpd" "mariadb-server" "mariadb" "php" "php-mysql")
 
 log() {
   local level=$1
@@ -28,22 +28,22 @@ log() {
 for pkg in "${pkgs[@]}"; do
   log "info" "Checking $pkg.."
   if rpm -aq | grep $pkg; then
-    log "success" "OK"
+    log "success" "OK\n"
   else
     log "warning" "$pkg is not installed. Installing.."
 #    || log "error" "Error during installation of $pkg."
-    sudo yum -y install $pkg 
+    sudo yum -y install $pkg
     wait
     log "info" "$pkg is installed."
   fi
 done
 
 # 2. mariadb configuration
-log "info" "Starting mariadb service.."
+log "info" "Checking mariadb service.."
 if sudo systemctl -q is-active mariadb;then
-  log "success" "OK"
+  log "success" "OK\n"
 else
-  log "warning" "Not running.."
+  log "warning" "mariadb not running.."
   sudo systemctl start mariadb
   sudo systemctl enable mariadb
 fi
