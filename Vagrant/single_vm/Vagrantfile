@@ -1,17 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-project = "vagrant"
-
 VAGRANT_API_VERSION = "2"
+
+project = "vagrant"
+shared_dir = "/custom_shared"
 
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
   config.vm.box = "Novitoll/centos7"
-  config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 80, host: 9999
   config.vm.hostname = "single"
 
   # use "../Vagrant" directory as the project
-  config.vm.synced_folder "..", "/custom_shared"
+  config.vm.synced_folder "..", "#{shared_dir}"
   config.vm.synced_folder "..", "/vagrant", disabled: true
 
   config.vm.provider "virtualbox" do |vb|
@@ -20,5 +21,6 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
   end
 
-  config.vm.provision "shell", path: "../lamp-provision.sh"
+  config.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir}"
+
 end
