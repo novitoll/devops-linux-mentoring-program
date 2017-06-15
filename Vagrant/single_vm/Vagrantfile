@@ -8,7 +8,7 @@ shared_dir = "/custom_shared"
 
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
   config.vm.box = "Novitoll/centos7"
-  config.vm.network "forwarded_port", guest: 80, host: 9999
+  config.vm.network "forwarded_port", guest: 80, host: 8080
   config.vm.hostname = "single"
 
   # use "../Vagrant" directory as the project
