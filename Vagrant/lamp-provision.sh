@@ -4,7 +4,7 @@ set -e
 
 CURRENT_DIR=${1:-"/custom_shared"}
 www_root="/var/www/html"  # apache httpd's assess files
-declare -a pkgs=("httpd" "mariadb-server" "mariadb" "php" "php-mysql")
+declare -a pkgs=("httpd" "mariadb-server" "mariadb" "php" "php-mysql" "policycoreutils-python")
 
 log() {
   local level=$1
@@ -82,5 +82,10 @@ if ! sudo firewall-cmd --list-services | grep http;then
   sudo firewall-cmd --permanent --zone=public --add-service=http
   sudo firewall-cmd --reload
 fi
+log "success" "OK\n"
+
+# 7. Disable SELinux for HTTPD
+log "info" "Disabling SELinux policy for httpd.."
+sudo semanage permissive -a httpd_t
 log "success" "OK\n"
 log "success" "DONE: Provision completed"
