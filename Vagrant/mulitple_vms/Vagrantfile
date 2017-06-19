@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANT_API_VERSION = "2"
+
+project = "vagrant-multiple-vms"
+shared_dir = "/custom_shared"
+box_name = "Novitoll/centos7"
+
+Vagrant.configure(VAGRANT_API_VERSION) do |config|
+  config.vm.define "web" do |web|
+    web.vm.box = box_name
+    web.vm.network "private_network", ip: "192.168.56.101"
+    web.vm.network "forwarded_port", guest: 80, host: 8080
+    web.vm.network "forwarded_port", guest: 22, host: 2200, id: "ssh"
+    web.vm.hostname = "web"
+    web.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir} web", env: {"IS_REMOTE_DB": "true"}
+  end
+
+  config.vm.define "db" do |db|
+    db.vm.box = box_name
+    db.vm.network "private_network", ip: "192.168.56.102"
+    db.vm.network "forwarded_port", guest: 3306, host: 3307
+    db.vm.network "forwarded_port", guest: 22, host: 2201, id: "ssh", auto_correct: true
+    db.vm.hostname = "db"
+    db.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir} db"
+  end
+
+  # use "../Vagrant" directory as the project
+  config.vm.synced_folder "..", "#{shared_dir}"
+  config.vm.synced_folder "..", "/vagrant", disabled: true
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = 1024
+    vb.cpus = 1
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
+  end
+
+end
