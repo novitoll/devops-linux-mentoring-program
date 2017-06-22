@@ -1,12 +1,7 @@
 <?php
-  // if (getenv('IS_REMOTE_DB') == true) {
-    $servername = "192.168.56.102";
-  // } else {
-  //   $servername = "localhost";
-  // }
-
-  $username = "root";
-  $password = "$3cr3t";
+  $servername = getenv("REMOTE_DB_HOST");
+  $username = getenv("DB_USER");
+  $password = getenv("DB_PWD");
   // Create connection
   $conn = new mysqli($servername, $username, $password);
   // Check connection

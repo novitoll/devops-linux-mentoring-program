@@ -7,19 +7,27 @@ project = "vagrant-multiple-vms"
 shared_dir = "/custom_shared"
 box_name = "Novitoll/centos7"
 
+web_host = "192.168.56.101"
+db_host = "192.168.56.102"
+
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
   config.vm.define "web" do |web|
     web.vm.box = box_name
-    web.vm.network "private_network", ip: "192.168.56.101"
+    web.vm.network "private_network", ip: web_host
     web.vm.network "forwarded_port", guest: 80, host: 8080
     web.vm.network "forwarded_port", guest: 22, host: 2200, id: "ssh"
     web.vm.hostname = "web"
-    web.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir} web", env: {"IS_REMOTE_DB": "true"}
+    web.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir} web",
+      env: {
+        "DB_USER": "root",
+        "DB_PWD": "s3cr3t",
+        "DB_HOST": db_host
+      }
   end
 
   config.vm.define "db" do |db|
     db.vm.box = box_name
-    db.vm.network "private_network", ip: "192.168.56.102"
+    db.vm.network "private_network", ip: db_host
     db.vm.network "forwarded_port", guest: 3306, host: 3307
     db.vm.network "forwarded_port", guest: 22, host: 2201, id: "ssh", auto_correct: true
     db.vm.hostname = "db"

@@ -23,6 +23,10 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
   end
 
-  config.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir}"
+  config.vm.provision "shell", path: "../lamp-provision.sh", args: "#{shared_dir}",
+    env: {
+          "DB_USER": "root",
+          "DB_PWD": "s3cr3t"
+    }
 
 end
