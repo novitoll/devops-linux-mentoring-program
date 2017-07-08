@@ -13,9 +13,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   config.vm.network "forwarded_port", guest: 22, host: 2222
   config.vm.hostname = "single"
 
-  # use "../Vagrant" directory as the project
-  config.vm.synced_folder "..", "#{shared_dir}"
-  config.vm.synced_folder "..", "/vagrant", disabled: true
+  # use project's root directory
+  config.vm.synced_folder "../..", "#{shared_dir}"
+  config.vm.synced_folder "../..", "/vagrant", disabled: true
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = 1024

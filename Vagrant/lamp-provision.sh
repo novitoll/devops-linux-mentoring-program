@@ -64,8 +64,8 @@ function provision_web() {
   log "info" "Checking if Apache's $www_root is symlinked with $CUSTOM_SHARED..\n"
   if [ ! -L "$www_root/index.php" ];then
     log "warning" "$www_root/index.php symlink not found. Creating symlink.."
-    sudo ln -s $CUSTOM_SHARED/web_app/index.php $www_root
-    sudo chmod +x $CUSTOM_SHARED/web_app
+    sudo ln -s $CUSTOM_SHARED/index.php $www_root
+    sudo chmod +x $CUSTOM_SHARED
   fi
   log "success" "OK\n"
 
