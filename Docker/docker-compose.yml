@@ -1,0 +1,26 @@
+version: '3'
+services:
+  load_balancer:
+    build: ./load_balancer
+    image: "load_balancer:latest"
+    ports:
+      - "80:80"
+    links:
+      - "web"
+    voslumes:
+      - ./load_balancer/conf:/etc/nginx/conf.d
+  web:
+    build: ./web
+    image: "web:latest"
+    ports:
+      - "8080:9000"
+    links:
+      - "db"
+      - "load_balancer"
+  db:
+    build: ./db
+    image: "db:latest"
+    ports:
+      - "3306:3306"
+    links:
+      - "web"
