@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="https://hub.docker.com/u/novitoll/"
 
-ADD . /web
+COPY . /web
 WORKDIR /web
 
 RUN yum install -y php php-fpm php-mysql
