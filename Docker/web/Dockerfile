@@ -7,6 +7,6 @@ WORKDIR /web
 
 RUN yum install -y php php-fpm php-mysql
 
-EXPOSE 80 9000
+EXPOSE 80
 
 CMD ["php-fpm"]

@@ -1,3 +1,4 @@
-CREATE USER 'web_user'@'web';
-GRANT ALL PRIVILEGES ON *.* TO 'web_user'@'web' IDENTIFIED BY 'password' WITH GRANT OPTION;
+CREATE USER 'web_user'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'web_user'@'%' IDENTIFIED BY 's3cr3t' WITH GRANT OPTION;
+
 FLUSH PRIVILEGES;

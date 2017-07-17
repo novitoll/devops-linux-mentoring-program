@@ -1,7 +1,11 @@
 <?php
-  $servername = getenv("REMOTE_DB_HOST");
-  $username = getenv("DB_USER");
-  $password = getenv("DB_PWD");
+  $servername = "db";
+  $username = "s3cr3t";
+  $password = "web_user";
+  $hostanme = gethostname();
+
+  echo "Connected to $hostanme\r\n"
+
   // Create connection
   $conn = new mysqli($servername, $username, $password);
   // Check connection

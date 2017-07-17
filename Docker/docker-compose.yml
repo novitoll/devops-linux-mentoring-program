@@ -2,25 +2,30 @@ version: '3'
 services:
   load_balancer:
     build: ./load_balancer
-    image: "load_balancer:latest"
+    container_name: load_balancer
     ports:
-      - "80:80"
+      - "8080:80"
     links:
-      - "web"
-    voslumes:
+      - "web_1"
+      - "web_2"
+    volumes:
       - ./load_balancer/conf:/etc/nginx/conf.d
-  web:
+  web_1:
     build: ./web
-    image: "web:latest"
-    ports:
-      - "8080:9000"
+    container_name: web_1
+    volumes:
+      - ./web/conf:/etc/nginx/conf.d
+      - ./web_app:/var/www/html
     links:
       - "db"
-      - "load_balancer"
+  web_2:
+    build: ./web
+    container_name: web_2
+    volumes:
+      - ./web/conf:/etc/nginx/conf.d
+      - ./web_app:/var/www/html
+    links:
+      - "db"
   db:
     build: ./db
-    image: "db:latest"
-    ports:
-      - "3306:3306"
-    links:
-      - "web"
+    container_name: db
