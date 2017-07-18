@@ -2,15 +2,25 @@ FROM centos:7
 
 LABEL maintainer="https://hub.docker.com/u/novitoll/"
 
-COPY ./conf/nginx-server.conf /etc/nginx/conf.d/nginx-server.conf
-COPY ./conf/php-fpm.conf /etc/php-fpm.d/php-fpm.conf
+ENV SCRIPTS_DIR /usr/share
+
+# nginx proxy to php-fpm socket
+ADD ./conf/nginx-server.conf /etc/nginx/conf.d/nginx-server.conf
+ADD ./nginx.sh $SCRIPTS_DIR/nginx.sh
+
+# PHP-fpm
+ADD ./conf/php-fpm.conf /etc/php-fpm.d/php-fpm.conf
+ADD ./php-fpm.sh $SCRIPTS_DIR/php-fpm.sh
+
+ADD ./startup.sh $SCRIPTS_DIR/startup.sh
+
 COPY ./index.php /var/www/html/index.php
 
-RUN yum install -y epel-release
+RUN yum install -y php php-fpm php-mysql
+RUN yum install -y epel-release \
+    && yum install -y nginx
 
-RUN yum install -y php php-fpm php-mysql nginx
-
-#ENTRYPOINT ["nginx" "-g" "daemon on;"]
+ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon on;"]
 
 EXPOSE 80
-CMD ["php-fpm"]
+CMD ["/bin/bash", "$SCRIPTS_DIR/php-fpm.sh"]

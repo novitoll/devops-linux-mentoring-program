@@ -21,8 +21,6 @@ services:
   db:
     build: ./db
     container_name: db
-    ports:
-      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=s3cr3t
       - MYSQL_USER=web_user
