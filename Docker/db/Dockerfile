@@ -2,11 +2,15 @@ FROM centos:7
 
 LABEL maintainer="https://hub.docker.com/u/novitoll/"
 
-COPY . /db
-WORKDIR /db
+COPY ./init.sh /db/init.sh
 
-RUN yum install -y mariadb-server
+RUN yum install -y mariadb-server \
+    && yum clean all \
+    && chmod +x /db/init.sh
+
+VOLUME /var/lib/mysql
+
+ENTRYPOINT ["/db/init.sh"]
 
 EXPOSE 3306
-
-#CMD ["mysql < /init.sql"]
+#CMD ["/db/init.sh"]
