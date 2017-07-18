@@ -6,32 +6,23 @@ services:
     ports:
       - "8080:80"
     links:
-      - web_1
-      - web_2
-#    volumes:
-#      - ./load_balancer/conf:/etc/nginx/conf.d
+      - web_1:web_1
+      - web_2:web_2
   web_1:
     build: ./web
     container_name: web_1
-#    volumes:
-#      - ./web/conf:/etc/nginx/conf.d
-#      - ./web_app:/var/www/html
     links:
-      - "db"
+      - db
   web_2:
     build: ./web
     container_name: web_2
-#    volumes:
-#      - ./web/conf:/etc/nginx/conf.d
-#      - ./web_app:/var/www/html
     links:
-      - "db"
+      - db
   db:
-    build:
-      context: ./db
-#      args:
-#        - OS_VERSION=centos7
+    build: ./db
     container_name: db
+    ports:
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=s3cr3t
       - MYSQL_USER=web_user

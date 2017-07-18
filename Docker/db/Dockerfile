@@ -10,7 +10,5 @@ RUN yum install -y mariadb-server \
 
 VOLUME /var/lib/mysql
 
-ENTRYPOINT ["/db/init.sh"]
-
 EXPOSE 3306
-#CMD ["/db/init.sh"]
+CMD ["/bin/bash", "/db/init.sh"]
