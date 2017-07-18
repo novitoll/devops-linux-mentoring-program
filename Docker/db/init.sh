@@ -12,7 +12,7 @@ while [[ RET -ne 0 ]]; do
       RET=$?
 done
 
-mysql -uroot -e "CREATE USER '${MYSQL_USER}'@'%';"
+mysql -uroot -e "CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%';"
 mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION;"
 mysql -uroot -e "FLUSH PRIVILEGES;"
 

@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="https://hub.docker.com/u/novitoll/"
 
-COPY ./conf/nginx_load_balance.conf /etc/nginx/conf.d/nginx_load_balance.conf
+COPY ./conf/nginx_load_balance.conf /etc/nginx/nginx.conf
 
 RUN yum install -y epel-release \
  && yum install -y nginx

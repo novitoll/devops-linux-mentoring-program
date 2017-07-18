@@ -4,6 +4,8 @@ LABEL maintainer="https://hub.docker.com/u/novitoll/"
 
 COPY ./init.sh /db/init.sh
 
+ADD ./MariaDB.repo /etc/yum.repos.d/MariaDB.repo
+
 RUN yum install -y mariadb-server mariadb-client \
     && yum clean all \
     && chmod +x /db/init.sh
