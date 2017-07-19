@@ -1,10 +1,10 @@
 <?php
   $servername = "db";
-  $username = "s3cr3t";
-  $password = "web_user";
+  $username = "web_user";
+  $password = "s3cr3t";
   $hostanme = gethostname();
 
-  echo "Connected to $hostanme\r\n"
+  echo "Connected to $hostanme\r\n";
 
   // Create connection
   $conn = new mysqli($servername, $username, $password);

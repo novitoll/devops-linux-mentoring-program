@@ -10,11 +10,13 @@ services:
       - web_2:web_2
   web_1:
     build: ./web
+    hostname: web_1
     container_name: web_1
     links:
       - db
   web_2:
     build: ./web
+    hostname: web_2
     container_name: web_2
     links:
       - db

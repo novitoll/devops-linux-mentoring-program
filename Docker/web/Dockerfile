@@ -17,8 +17,8 @@ COPY ./startup.sh $SCRIPTS_DIR/startup.sh
 COPY ./php-fpm.sh $SCRIPTS_DIR/php-fpm.sh
 
 # PHP-fpm
-COPY ./conf/php-fpm.conf /etc/php-fpm.d/php-fpm.conf
-COPY ./index.php /var/www/html/index.php
+COPY ./conf/php-fpm.conf /etc/php-fpm.d/www.conf
+COPY ./index.php /usr/share/nginx/html/index.php
 
 RUN chmod +x -R $SCRIPTS_DIR
 
