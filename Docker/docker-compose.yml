@@ -2,6 +2,7 @@ version: '2'
 services:
   load_balancer:
     build: ./load_balancer
+    restart: always
     container_name: load_balancer
     ports:
       - "8080:80"
@@ -10,18 +11,21 @@ services:
       - web_2:web_2
   web_1:
     build: ./web
+    restart: on-failure
     hostname: web_1
     container_name: web_1
     links:
       - db
   web_2:
     build: ./web
+    restart: on-failure
     hostname: web_2
     container_name: web_2
     links:
       - db
   db:
     build: ./db
+    restart: always
     container_name: db
     environment:
       - MYSQL_ROOT_PASSWORD=s3cr3t

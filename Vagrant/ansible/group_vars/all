@@ -1,0 +1,3 @@
+db_host: db
+db_user: user
+db_pwd: p@$$w0rd

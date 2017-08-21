@@ -1,0 +1,11 @@
+---
+- hosts: db
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: install mariadb, mariadb-server
+      yum: name={{item}} state=present update_cache=yes
+      with_items:
+        - mariadb
+        - mariadb-server

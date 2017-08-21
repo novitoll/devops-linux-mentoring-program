@@ -1,0 +1,21 @@
+---
+- hosts: web
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: install apache httpd, php, php-mysql
+      yum: name={{item}} state=present update_cache=yes
+      with_items:
+        - httpd
+        - php
+        - php-mysql
+
+    - name: start apache2 service
+      service: name=apache2 state=started enabled=yes
+      apache2_module:
+      notify: apache2 restart
+
+  handlers:
+    - name: apache2 restart
+
