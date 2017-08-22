@@ -1,32 +1,16 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-require 'json'
-
 VAGRANT_API_VERSION = "2"
-
-file = File.read('hosts.json')
-hosts_data = JSON.parse(file)
-mgmt_ip = hosts_data["ansible"]
-web_ip = hosts_data["web"]
-db_ip = hosts_data["db"]
 
 project = "vagrant-ansible-configuration-management"
 box_name = "Novitoll/centos7"
 
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
-  config.vm.define "ansible" do |ansible|
-    ansible.vm.box = box_name
-    ansible.vm.network "private_network", ip: mgmt_ip
-    ansible.vm.network "forwarded_port", guest: 22, host: 2200, id: "ssh"
-    ansible.vm.hostname = "ansible"
-    ansible.vm.provision "shell", path: "./bootstrap-ansible-mgmt-node.sh", args: "#{web_ip} #{db_ip} #{mgmt_ip}"
-  end
-
   config.vm.define "web" do |web|
     web.vm.box = box_name
-    web.vm.network "private_network", ip: web_ip
+    web.vm.network "private_network", ip: "192.168.56.102"
     web.vm.network "forwarded_port", guest: 80, host: 8080
     web.vm.network "forwarded_port", guest: 22, host: 2201, id: "ssh"
     web.vm.hostname = "web"
@@ -34,10 +18,18 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
   config.vm.define "db" do |db|
     db.vm.box = box_name
-    db.vm.network "private_network", ip: db_ip
+    db.vm.network "private_network", ip: "192.168.56.103"
     db.vm.network "forwarded_port", guest: 3306, host: 3307
     db.vm.network "forwarded_port", guest: 22, host: 2202, id: "ssh"
     db.vm.hostname = "db"
+  end
+
+  config.vm.define "ansible", primary: true do |ansible|
+    ansible.vm.box = box_name
+    ansible.vm.network "private_network", ip: "192.168.56.101"
+    ansible.vm.network "forwarded_port", guest: 22, host: 2200, id: "ssh"
+    ansible.vm.hostname = "ansible"
+    ansible.vm.provision "shell", path: "./bootstrap-ansible.sh"
   end
 
   config.vm.provider "virtualbox" do |vb|
