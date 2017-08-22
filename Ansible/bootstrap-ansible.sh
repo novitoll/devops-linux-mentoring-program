@@ -24,8 +24,8 @@ if [ ! -d $git_repo_dir ]; then
 fi
 
 # check SSH RSA keys
-if [ ! -f "/home/vagrant/.ssh/id_rsa" ]; then
-    ssh-keygen -f "/home/vagrant/.ssh/id_rsa" -t rsa -N ""
+if [ ! -f "/home/root/.ssh/ansible" ]; then
+    ssh-keygen -f "/home/root/.ssh/ansible" -t rsa -N ""
 fi
 
 if [ ! -f $home_dir/hosts.ini ]; then
@@ -41,9 +41,3 @@ chown -R vagrant:vagrant $home_dir
 
 # execute ssh-add playbook to copy SSH to web and db
 ansible-playbook $git_repo_dir/Ansible/node/playbooks/ssh-add.yml
-
-# execute web playbook
-#ansible-playbook $git_repo_dir/Ansible/node/playbooks/web.yml
-#
-## execute db playbook
-#ansible-playbook $git_repo_dir/Ansible/node/playbooks/db.yml

@@ -1,10 +1,11 @@
 ---
 - hosts: all
   gather_facts: no
+  become: true
   remote_user: vagrant
 
   tasks:
     - name: install public SSH keys on remote machines
       authorized_key: user=vagrant
-                      key="{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}"
+                      key="{{ lookup('file', '/home/root/.ssh/id_rsa.pub') }}"
                       state=present
