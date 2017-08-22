@@ -1,10 +1,10 @@
 ---
 - hosts: all
   gather_facts: no
-  remote_user: vagrant
+  remote_user: root
 
   tasks:
     - name: install public SSH keys on remote machines
-      authorized_key: user=vagrant
-                      key="{{ lookup('file', '/home/vagrant/.ssh/ansible.pub') }}"
+      authorized_key: user=root
+                      key="{{ lookup('file', '/home/root/.ssh/ansible.pub') }}"
                       state=present

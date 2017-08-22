@@ -26,8 +26,8 @@ fi
 mkdir -p /home/root/.ssh
 
 # check SSH RSA keys
-if [ ! -f "$home_dir/.ssh/ansible" ]; then
-    ssh-keygen -f "$home_dir/.ssh/ansible" -t rsa -N ''
+if [ ! -f "/home/root/.ssh/ansible" ]; then
+    ssh-keygen -f "/home/root/.ssh/ansible" -t rsa
 fi
 
 if [ ! -f $home_dir/hosts.ini ]; then
