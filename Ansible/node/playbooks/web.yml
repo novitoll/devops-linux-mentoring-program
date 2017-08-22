@@ -1,5 +1,5 @@
 ---
-- hosts: web
+- hosts: webservers
   become: true
   gather_facts: no
 
@@ -11,12 +11,11 @@
         - php
         - php-mysql
 
-    - name: start apache2 service
+    - name: start apache2
       service: name=apache2 state=started enabled=yes
-      apache2_module:
       notify: restart apache2
 
   handlers:
-    - name: apache2 restart
+    - name: restart apache2
       service: name=apache2 state=restarted
 

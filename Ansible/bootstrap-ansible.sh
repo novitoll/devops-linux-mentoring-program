@@ -16,17 +16,22 @@ echo "Ansible version is $(ansible --version)"
 yum install -y git
 
 # copy repo to ansbile VM
+# ideally, we should also pull master branch of git repo if the repo directory exists,
+# but we also need to handle Git auth then, so wont make complex things
 if [ ! -d $git_repo_dir ]; then
     echo "No repository found. Cloning Git repo $git_repo.."
     git clone $git_repo $git_repo_dir;
-else
-    echo "Pulling Git repo.."
-    git pull $git_repo $git_repo_dir;
 fi
 
+mkdir -p /home/root/.ssh
+
 # check SSH RSA keys
-if [ ! -f $home_dir/.ssh/id_rsa ]; then
-    ssh-keygen -f $home_dir/.ssh/id_rsa -t rsa -N ''
+if [ ! -f "$home_dir/.ssh/ansible" ]; then
+    ssh-keygen -f "$home_dir/.ssh/ansible" -t rsa -N ''
+fi
+
+if [ ! -f $home_dir/hosts.ini ]; then
+    cp $git_repo_dir/Ansible/node/hosts.ini $home_dir/hosts.ini
 fi
 
 # configure hosts file for our internal network defined by Vagrantfile
@@ -37,7 +42,7 @@ cat $git_repo_dir/Ansible/node/ansible.cfg >> $home_dir/ansible.cfg
 chown -R vagrant:vagrant $home_dir
 
 # execute ssh-add playbook to copy SSH to web and db
-ansible-playbook $git_repo_dir/Ansible/node/playbooks/ssh-add.yml
+ansible-playbook $git_repo_dir/Ansible/node/playbooks/ssh-add.yml -u vagrant
 
 # execute web playbook
 #ansible-playbook $git_repo_dir/Ansible/node/playbooks/web.yml
