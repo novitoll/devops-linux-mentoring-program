@@ -23,11 +23,9 @@ if [ ! -d $git_repo_dir ]; then
     git clone $git_repo $git_repo_dir;
 fi
 
-mkdir -p /home/root/.ssh
-
 # check SSH RSA keys
-if [ ! -f "/home/root/.ssh/ansible" ]; then
-    ssh-keygen -f "/home/root/.ssh/ansible" -t rsa
+if [ ! -f "/home/vagrant/.ssh/ansible" ]; then
+    ssh-keygen -f "/home/vagrant/.ssh/ansible" -t rsa -N ''
 fi
 
 if [ ! -f $home_dir/hosts.ini ]; then
