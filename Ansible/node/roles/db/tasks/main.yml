@@ -1,14 +1,11 @@
 ---
-- name: Add repo file
-  template: src=mariadb.repo.j2 dest=/etc/yum.repos.d/mariadb.repo owner=root group=root mode=0644
-
 - name: install mariadb
-  yum: name={{item}} state=present enablerepo=mariadb
+  yum: name={{item}} state=present update_cache=yes
   with_items:
+    - mariadb
     - mariadb-server
-    - mariadb-client
 
-- name: install mysql python for security
+- name: install mariadb python for security
   yum: name=MySQL-python state=present
 
 - name: start mariadb
@@ -25,9 +22,9 @@
     state: enabled
     zone: public
 
-- name: enable mysql to firewall
+- name: enable mariadb to firewall
   firewalld:
-    service: mysql
+    service: mariadb
     immediate: true
     permanent: true
     state: enabled
