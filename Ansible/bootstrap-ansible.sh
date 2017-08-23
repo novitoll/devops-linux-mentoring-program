@@ -25,11 +25,11 @@ fi
 
 mkdir -p /root/.ssh
 chmod 700 /root/.ssh
-chmod 400 ~/.ssh/id_rsa
 
 # check SSH RSA keys
 if [ ! -f "/root/.ssh/id_rsa" ]; then
     cp /vagrant/node/ssh/id_rsa /root/.ssh/id_rsa
+    chmod 400 /root/.ssh/id_rsa
 fi
 
 if [ ! -f $home_dir/hosts.ini ]; then
