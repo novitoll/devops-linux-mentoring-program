@@ -8,7 +8,6 @@
 
 - name: start httpd
   service: name=httpd state=started enabled=yes
-  notify: restart httpd
 
 - name: create index.php from jinja template
   template: src=index.php.j2 dest=/var/www/index.php mode=0664 group=apache owner=apache
@@ -16,6 +15,7 @@
 - name: open 80 port
   firewalld:
     port: 80/tcp
+    immediate: true
     permanent: true
     state: enabled
     zone: public
@@ -23,6 +23,7 @@
 - name: enable http to firewall
   firewalld:
     service: http
+    immediate: true
     permanent: true
     state: enabled
     zone: public
@@ -30,4 +31,3 @@
 - name: disable SELinux
   selinux:
     state: disabled
-
