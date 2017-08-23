@@ -11,11 +11,25 @@
         - php
         - php-mysql
 
-    - name: start apache2
-      service: name=apache2 state=started enabled=yes
-      notify: restart apache2
+    - name: start httpd
+      service: name=httpd state=started enabled=yes
+      notify: restart httpd
+
+    - name: create index.php from jinja template
+      template: src=
+
+    - name: open 80 port
+      firewalld:
+        port: 80/tcp
+        permanent: true
+        state: enabled
+        zone: public
+
+    - name: disable SELinux
+      selinux:
+        state: disabled
 
   handlers:
-    - name: restart apache2
-      service: name=apache2 state=restarted
+    - name: restart httpd
+      service: name=httpd state=restarted
 
