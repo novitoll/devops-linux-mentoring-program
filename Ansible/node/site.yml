@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: true
+  gather_facts: no
+
+  vars_prompt:
+    - name: "greetings"
+      prompt: "Hello, common!"
+
+  roles:
+    - common
+
+- hosts: webservers
+  become: true
+
+  roles:
+    - web
+
+- hosts: databases
+  become: true
+  gather_facts: no
+
+  roles:
+    - db

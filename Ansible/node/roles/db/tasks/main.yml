@@ -1,0 +1,27 @@
+---
+- name: install mariadb, mariadb-server
+  yum: name={{item}} state=present update_cache=yes
+  with_items:
+    - mariadb
+    - mariadb-server
+    - libselinux-python
+    - libsemanage-python
+
+- name: start mariadb
+  service: name=mariadb state=started enabled=yes
+
+- name: open 3306 port
+  firewalld:
+    port: 3306/tcp
+    permanent: true
+    state: enabled
+    zone: public
+
+- name: set db user
+  mysql_user: name={{ db_user }} password={{ db_pwd }} priv=*.*:ALL host='%' state=present
+
+#- name: configure SELinux
+#  seboolean: name=mysql_connect_any state=true persistent=yes
+
+- name: configure SELinux for external DB connection
+  seboolean: name=httpd_can_network_connect_db state=true persistent=yes
