@@ -1,12 +1,6 @@
 # Playbook from https://github.com/veggiemonk/ansible-ohmyzsh/blob/master/tasks/main.yml
 # with few additions
 ---
-- name: security question
-  expect:
-    command: echo "you god damn right!"
-    responses:
-      'say my name? (lowercase)': "heisenberg"
-    echo: yes
 
 - name: Installing Zsh and git
   yum: pkg=zsh,git state=latest

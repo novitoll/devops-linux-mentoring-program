@@ -1,6 +1,5 @@
 ---
 - name: install apache httpd, php, php-mysql
-  become: true
   yum: name={{item}} state=present update_cache=yes
   with_items:
     - httpd
@@ -8,24 +7,27 @@
     - php-mysql
 
 - name: start httpd
-  become: true
   service: name=httpd state=started enabled=yes
   notify: restart httpd
 
 - name: create index.php from jinja template
-  become: no
-  template: src=index.php.j2 dest=/var/www/html/index.php
+  template: src=index.php.j2 dest=/var/www/index.php mode=0664 group=apache owner=apache
 
 - name: open 80 port
-  become: true
   firewalld:
     port: 80/tcp
     permanent: true
     state: enabled
     zone: public
 
+- name: enable http to firewall
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    zone: public
+
 - name: disable SELinux
-  become: true
   selinux:
     state: disabled
 

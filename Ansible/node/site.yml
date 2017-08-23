@@ -2,14 +2,15 @@
 - hosts: all
   become: true
   gather_facts: no
-
   roles:
     - common
 
 - hosts: webservers
+  become: true
   roles:
     - web
 
 - hosts: databases
+  become: true
   roles:
     - db
