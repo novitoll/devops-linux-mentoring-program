@@ -1,6 +1,6 @@
 ---
 - name: install mariadb
-  yum: name={{item}} state=present update_cache=yes
+  yum: name="{{ item }}" state=present update_cache=yes
   with_items:
     - mariadb
     - mariadb-server
@@ -12,7 +12,7 @@
   service: name=mariadb state=started enabled=yes
 
 - name: set db user
-  mysql_user: name={{ db_user }} password={{ db_pwd }} priv=*.*:ALL host='%' state=present
+  mysql_user: name="{{ db_user }}" password="{{ db_pwd }}" priv=*.*:ALL host='%' state=present
 
 - name: open 3306 port
   firewalld:
@@ -22,9 +22,9 @@
     state: enabled
     zone: public
 
-- name: enable mariadb to firewall
+- name: enable mysql to firewall
   firewalld:
-    service: mariadb
+    service: mysql
     immediate: true
     permanent: true
     state: enabled

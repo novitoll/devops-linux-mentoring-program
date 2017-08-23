@@ -13,12 +13,14 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     web.vm.network "private_network", ip: "192.168.56.102"
     web.vm.network "forwarded_port", guest: 80, host: 8080
     web.vm.hostname = "web"
+    ansible.vm.provision "shell", path: "./ssh-add.sh"
   end
 
   config.vm.define "db" do |db|
     db.vm.box = box_name
     db.vm.network "private_network", ip: "192.168.56.103"
     db.vm.hostname = "db"
+    ansible.vm.provision "shell", path: "./ssh-add.sh"
   end
 
   config.vm.define "ansible", primary: true do |ansible|

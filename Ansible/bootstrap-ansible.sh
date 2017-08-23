@@ -37,7 +37,4 @@ fi
 cat $git_repo_dir/Ansible/node/hosts >> "/etc/hosts"
 cat $git_repo_dir/Ansible/node/ansible.cfg >> "/etc/ansible/ansible.cfg"
 
-# execute ssh-add playbook to copy SSH to web and db
-ansible-playbook $git_repo_dir/Ansible/node/ssh-add.yml
-
 echo "DONE. You can now play the main playbook $git_repo_dir/Ansible/node/site.yml via ansible-playbook."
