@@ -10,7 +10,7 @@
   service: name=httpd state=started enabled=yes
 
 - name: create index.php from jinja template
-  template: src=index.php.j2 dest=/var/www/index.php mode=0664 group=apache owner=apache
+  template: src=index.php.j2 dest=/var/www/html/index.php mode=0664 group=apache owner=apache
 
 - name: open 80 port
   firewalld:
