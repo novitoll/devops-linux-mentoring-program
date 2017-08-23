@@ -25,7 +25,7 @@ fi
 
 # check SSH RSA keys
 if [ ! -f "/root/.ssh/id_rsa" ]; then
-    cp /vagrant/ssh/id_rsa /root/.ssh/id_rsa
+    cp /vagrant/node/ssh/id_rsa /root/.ssh/id_rsa
 fi
 
 if [ ! -f $home_dir/hosts.ini ]; then

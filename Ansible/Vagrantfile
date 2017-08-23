@@ -28,7 +28,6 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     ansible.vm.network "private_network", ip: "192.168.56.101"
     ansible.vm.hostname = "ansible"
     ansible.vm.provision "shell", path: "./bootstrap-ansible.sh"
-    ansible.vm.synced_folder "..", "/vagrant", disabled: true
   end
 
   config.vm.provider "virtualbox" do |vb|

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+mkdir -p /root/.ssh
 touch /root/.ssh/authorized_keys
 cat /vagrant/node/ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 
