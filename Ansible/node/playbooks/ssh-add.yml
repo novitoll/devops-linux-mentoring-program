@@ -7,5 +7,5 @@
   tasks:
     - name: install public SSH keys on remote machines
       authorized_key: user=vagrant
-                      key="{{ lookup('file', '/home/root/.ssh/id_rsa.pub') }}"
+                      key="{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
                       state=present

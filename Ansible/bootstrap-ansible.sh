@@ -23,9 +23,11 @@ if [ ! -d $git_repo_dir ]; then
     git clone $git_repo $git_repo_dir;
 fi
 
+mkdir -p /root/.ssh
+
 # check SSH RSA keys
-if [ ! -f "/home/root/.ssh/ansible" ]; then
-    ssh-keygen -f "/home/root/.ssh/ansible" -t rsa -N ""
+if [ ! -f "/root/.ssh/ansible" ]; then
+    ssh-keygen -f "/root/.ssh/id_rsa" -t rsa -P ""
 fi
 
 if [ ! -f $home_dir/hosts.ini ]; then
@@ -34,8 +36,8 @@ fi
 
 # configure hosts file for our internal network defined by Vagrantfile
 # TODO: need to check this for idempotence
-cat $git_repo_dir/Ansible/node/hosts >> /etc/hosts
-cat $git_repo_dir/Ansible/node/ansible.cfg >> $home_dir/ansible.cfg
+cat $git_repo_dir/Ansible/node/hosts >> "/etc/hosts"
+cat $git_repo_dir/Ansible/node/ansible.cfg >> "/etc/ansible/ansible.cfg"
 
 chown -R vagrant:vagrant $home_dir
 
