@@ -1,27 +1,24 @@
 # Playbook from https://github.com/veggiemonk/ansible-ohmyzsh/blob/master/tasks/main.yml
 # with few additions
 ---
-
 - name: Installing Zsh and git
   yum: pkg=zsh,git state=latest
   register: installation
 
-- name: Backing up existing ~/.zshrc
-  shell: if [ -f ~/.zshrc ]; then mv ~/.zshrc{,.orig}; fi
+- name: create /root/.zshrc
+  command: mkdir -p /root/.zshrc
+
+- name: Backing up existing /root/.zshrc
+  shell: if [ -f /root/.zshrc ]; then mv /root/.zshrc{,.orig}; fi
   when: installation|success
-  become: no
 
 - name: Cloning  oh-my-zsh
   git:
     repo=https://github.com/robbyrussell/oh-my-zsh
-    dest=~/.oh-my-zsh
+    dest=/root/.oh-my-zsh
   when: installation|success
   register: cloning
-  become: no
 
-- name: Creating new ~/.zshrc
-  copy:
-    src=~/.oh-my-zsh/templates/zshrc.zsh-template
-    dest=~/.zshrc
+- name: Creating new /root/.zshrc
+  command: cp /root/.oh-my-zsh/templates/zshrc.zsh-template /root/.zshrc
   when: cloning|success
-  become: no
