@@ -1,13 +1,21 @@
 # Playbook from https://github.com/veggiemonk/ansible-ohmyzsh/blob/master/tasks/main.yml
+# with few additions
 ---
+- name: security question
+  expect:
+    command: echo "you god damn right!"
+    responses:
+      'say my name? (lowercase)': "heisenberg"
+    echo: yes
+
 - name: Installing Zsh and git
-  apt: pkg=zsh,git state=latest
+  yum: pkg=zsh,git state=latest
   register: installation
 
 - name: Backing up existing ~/.zshrc
   shell: if [ -f ~/.zshrc ]; then mv ~/.zshrc{,.orig}; fi
   when: installation|success
-  sudo: no
+  become: no
 
 - name: Cloning  oh-my-zsh
   git:
@@ -15,11 +23,11 @@
     dest=~/.oh-my-zsh
   when: installation|success
   register: cloning
-  sudo: no
+  become: no
 
 - name: Creating new ~/.zshrc
   copy:
     src=~/.oh-my-zsh/templates/zshrc.zsh-template
     dest=~/.zshrc
   when: cloning|success
-  sudo: no
+  become: no
