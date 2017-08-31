@@ -38,8 +38,5 @@ $ sudo ansible-playbook /home/vagrant/my_repo/Ansible/node/site.yml
 localhost:8080 -> Connected successfully
 ```
 
-- AWS
-- POC (Proof-of-concept: all techs in one test project as the infrastructure)
-
 ### License
 MIT
