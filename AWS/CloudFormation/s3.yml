@@ -1,0 +1,19 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Test template to create S3 bucket
+Parameters:
+  BucketName:
+    Description: Name of S3Bucket
+    Type: String
+    Default: s3-cfn-tpls-aws-sabrtasbolatov
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+
+Outputs:
+  S3BucketName:
+    Value: !Ref S3Bucket
+    Description: Name of S3 bucket

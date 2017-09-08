@@ -1,0 +1,235 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template for creating VPC, Subnets for AZs
+
+Mappings:
+  VPCRanges:
+    10.250.0.0:
+      PublicSubnetAZ1: 10.250.0.0/22
+      PublicSubnetAZ2: 10.250.4.0/22
+      PrivateSubnetAZ1: 10.250.32.0/21
+      PrivateSubnetAZ2: 10.250.40.0/21
+    10.250.0.1:
+      PublicSubnetAZ1: 10.251.0.0/22
+      PublicSubnetAZ2: 10.251.4.0/22
+      PrivateSubnetAZ1: 10.251.32.0/21
+      PrivateSubnetAZ2: 10.251.40.0/21
+
+Parameters:
+  CIDRRange:
+    Description: VPCCIDR Range (will be a /16 block)
+    Type: String
+    Default: 10.251.0.0
+    AllowedValues: [10.250.0.0, 10.251.0.0]
+
+Resources:
+  # custom VPC with the given CIDR range from user input
+  CustomVPC:
+    Type: AWS::EC2::VPC
+    Description: Custom VPC
+    Properties:
+      CidrBlock: !Join ["", [!Ref CIDRRange, /16]]
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-VPC']]
+
+  # Create 2 public subnets per AZ
+  PublicNetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+       - 0
+       - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: !FindInMap [VPCRanges, !Ref CIDRRange, PublicSubnetAZ1]
+      MaPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PublicAZ1']]
+      VpcId: !Ref CustomVPC
+  PublicNetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+       - 1
+       - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: !FindInMap [VPCRanges, !Ref CIDRRange, PublicSubnetAZ2]
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PublicAZ2']]
+      VpcId: !Ref CustomVPC
+
+  # Create 2 private subnets per AZ
+  PrivateNetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+       - 0
+       - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: !FindInMap [VPCRanges, !Ref CIDRRange, PrivateSubnetAZ1]
+      MapPublicIpOnLaunch: False
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PrivateAZ1']]
+        - Key: Network
+          Value: private
+      VpcId: !Ref CustomVPC
+  PrivateNetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+       - 1
+       - Fn::GetAZs: !Ref 'AWS::Region'
+      CidrBlock: !FindInMap [VPCRanges, !Ref CIDRRange, PrivateSubnetAZ2]
+      MapPublicIpOnLaunch: False
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PrivateAZ2']]
+        - Key: Network
+          Value: private
+      VpcId: !Ref CustomVPC
+
+  # Internet Gateway & attachment to VPC
+  IGWBase:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-IGW']]
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref IGWBase
+      VpcId: !Ref CustomVPC
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-VPCGA']]
+
+  # Public Route Table
+  RouteTablePublic:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CustomVPC
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PublicRT']]
+
+  # Public Route
+  RoutePublic:
+    DependsOn:
+      - VPCGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGWBase
+
+  # Private Route Table per AZ
+  RouteTablePrivateAZ1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CustomVPC
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PrivateRTAZ1']]
+  RouteTablePrivateAZ2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CustomVPC
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-PrivateRTAZ2']]
+
+  # Public Route Tables Associations
+  RouteAssociationPublicAZ1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicNetAZ1
+      RouteTableId: !Ref RouteTablePublic
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPublicAZ1']]
+  RouteAssociationPublicAZ2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicNetAZ2
+      RouteTableId: !Ref RouteTablePublic
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPublicAZ2']]
+
+  # Private Route Tables Associations
+  RouteAssociationPrivateAZ1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateNetAZ1
+      RouteTableId: !Ref RouteTablePrivateAZ1
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPrivateAZ1']]
+  RouteAssociationPrivateAZ2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateNetAZ2
+      RouteTableId: !Ref RouteTablePrivateAZ2
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPrivateAZ2']]
+
+  # NAT Gateway + EIP + Route per AZ
+  EIPNATAZ1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATAZ1:
+    Type: AWS::EC2::NatGateway
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      AllocationId: !GetAtt [EIPNATAZ1, AllocationId]
+      SubnetId: !Ref PublicNetAZ1
+  NATAZ1Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateAZ1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATAZ1
+
+  EIPNATAZ2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATAZ2:
+    Type: AWS::EC2::NatGateway
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      AllocationId: !GetAtt [EIPNATAZ2, AllocationId]
+      SubnetId: !Ref PublicNetAZ2
+  NATAZ2Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateAZ2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATAZ2
+
+
+Outputs:
+  VPCID:
+    Value: !Ref CustomVPC
+  ElasticIP1:
+    Value: !Ref EIPNATAZ1
+  ElasticIP2:
+    Value: !Ref EIPNATAZ2
+  SubnetPublicAZ1:
+    Value: !Ref PublicNetAZ1
+  SubnetPublicAZ2:
+    Value: !Ref PublicNetAZ2
+  SubnetPrivateAZ1:
+    Value: !Ref PrivateNetAZ1
+  SubnetPrivateAZ2:
+    Value: !Ref PrivateNetAZ2
+  DefaultSG:
+    Value: !GetAtt [CustomVPC, DefaultSecurityGroup]
+
+
