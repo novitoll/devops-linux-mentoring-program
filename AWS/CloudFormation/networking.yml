@@ -9,7 +9,7 @@ Mappings:
       PublicSubnetAZ2: 10.250.4.0/22
       PrivateSubnetAZ1: 10.250.32.0/21
       PrivateSubnetAZ2: 10.250.40.0/21
-    10.250.0.1:
+    10.251.0.0:
       PublicSubnetAZ1: 10.251.0.0/22
       PublicSubnetAZ2: 10.251.4.0/22
       PrivateSubnetAZ1: 10.251.32.0/21
@@ -43,7 +43,7 @@ Resources:
        - 0
        - Fn::GetAZs: !Ref 'AWS::Region'
       CidrBlock: !FindInMap [VPCRanges, !Ref CIDRRange, PublicSubnetAZ1]
-      MaPublicIpOnLaunch: True
+      MapPublicIpOnLaunch: True
       Tags:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-PublicAZ1']]
@@ -103,9 +103,6 @@ Resources:
     Properties:
       InternetGatewayId: !Ref IGWBase
       VpcId: !Ref CustomVPC
-      Tags:
-        - Key: Name
-          Value: !Join ["", [!Ref 'AWS::StackName', '-VPCGA']]
 
   # Public Route Table
   RouteTablePublic:
@@ -148,17 +145,11 @@ Resources:
     Properties:
       SubnetId: !Ref PublicNetAZ1
       RouteTableId: !Ref RouteTablePublic
-      Tags:
-        - Key: Name
-          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPublicAZ1']]
   RouteAssociationPublicAZ2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicNetAZ2
       RouteTableId: !Ref RouteTablePublic
-      Tags:
-        - Key: Name
-          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPublicAZ2']]
 
   # Private Route Tables Associations
   RouteAssociationPrivateAZ1:
@@ -166,17 +157,11 @@ Resources:
     Properties:
       SubnetId: !Ref PrivateNetAZ1
       RouteTableId: !Ref RouteTablePrivateAZ1
-      Tags:
-        - Key: Name
-          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPrivateAZ1']]
   RouteAssociationPrivateAZ2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateNetAZ2
       RouteTableId: !Ref RouteTablePrivateAZ2
-      Tags:
-        - Key: Name
-          Value: !Join ["", [!Ref 'AWS::StackName', '-RouteAssocPrivateAZ2']]
 
   # NAT Gateway + EIP + Route per AZ
   EIPNATAZ1:
