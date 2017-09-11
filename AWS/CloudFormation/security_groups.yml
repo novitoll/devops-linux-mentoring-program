@@ -1,15 +1,65 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Template for creating VPC, Subnets for AZs
+Description: Template for creating Security Groups for the given VPC ID
 
-Mapping:
-  {}
+Mappings:
+  AllowedIPs:
+    Offices:
+      Karaganda: 91.185.25.194/32
+      Astana: 178.89.5.130/32
 
 Parameters:
-  {}
+  VPCId:
+    Description: VPC ID
+    Type: String
 
 Resources:
-  {}
+
+  AdminInSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Admin Inbound Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: !FindInMap [AllowedIPs, Offices, Karaganda]
+          FromPort: '-1'
+          ToPort: '-1'
+        - IpProtocol: tcp
+          CidrIp: !FindInMap [AllowedIPs, Offices, Astana]
+          FromPort: '-1'
+          ToPort: '-1'
+      VpcId: !Ref VPCId
+
+  ELBInSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: All TCP connection Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          FromPort: '-1'
+          ToPort: '-1'
+      VpcId: !Ref VPCId
+
+  EC2InSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Admin Inbound Security Group
+      SecurityGroupIngress: !Ref ELBInSG
+
+  RDSInSG:
+    Type: AWS::RDS::DBSecurityGroup
+    Properties:
+      EC2VpcId: !Ref VPCId
+      DBSecurityGroupIngress:
+        EC2SecurityGroupName: !Ref EC2InSG
 
 Outputs:
-  {}
+  AdminInSGId:
+    Value: !GetAtt [AdminInSG, "GroupId"]
+  ELBInSGId:
+    Value: !GetAtt [ELBInSG, "GroupId"]
+  EC2InSGId:
+    Value: !GetAtt [EC2InSG, "GroupId"]
+  RDSInSGId:
+    Value: !Ref RDSInSG
