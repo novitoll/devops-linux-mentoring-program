@@ -10,8 +10,8 @@ Mappings:
 
 Parameters:
   VPCId:
+    Type: AWS::EC2::VPC::Id
     Description: VPC ID
-    Type: String
 
 Resources:
 

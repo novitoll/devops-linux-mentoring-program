@@ -41,6 +41,10 @@ Parameters:
     Description: To create the slow query log, set to 1. The default is 0.
     Default: 0
     AllowedValues: [0, 1]
+  SecurityGroups:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: List of security group Ids
+
 
 Resources:
   # 1. DB Subnet
@@ -77,6 +81,7 @@ Resources:
       MasterUserPassword: !Ref DBPassword
       DBInstanceClass: !Ref DBInstanceClass
       DBParameterGroupName: !Ref DBParamGroup
+      DBSecurityGroups: !Ref SecurityGroups
       Tags:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-DBInstance']]
