@@ -15,51 +15,74 @@ Parameters:
 
 Resources:
 
-  AdminInSG:
+  # 1. Admin SG
+  AdminSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Admin Inbound Security Group
       SecurityGroupIngress:
         - IpProtocol: tcp
           CidrIp: !FindInMap [AllowedIPs, Offices, Karaganda]
-          FromPort: '-1'
-          ToPort: '-1'
+          FromPort: 0
+          ToPort: 65535
         - IpProtocol: tcp
           CidrIp: !FindInMap [AllowedIPs, Offices, Astana]
-          FromPort: '-1'
-          ToPort: '-1'
+          FromPort: 0
+          ToPort: 65535
       VpcId: !Ref VPCId
 
-  ELBInSG:
+  # 2. ELB SG
+  ELBSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: All TCP connection Security Group
+      GroupDescription: All TCP connection Security Group for ELB
       SecurityGroupIngress:
         - IpProtocol: tcp
           CidrIp: 0.0.0.0/0
-          FromPort: '-1'
-          ToPort: '-1'
+          FromPort: 0
+          ToPort: 65535
       VpcId: !Ref VPCId
 
-  EC2InSG:
+  # 3. EC2 SG
+  EC2SG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Admin Inbound Security Group
-      SecurityGroupIngress: !Ref ELBInSG
+      GroupDescription: All TCP connection Security Group for EC2
+      VpcId: !Ref VPCId
 
-  RDSInSG:
+  InboundTcpRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !GetAtt [ELBSG, "GroupId"]
+      GroupId: !GetAtt [EC2SG, "GroupId"]
+
+  OutboundTcpRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      DestinationSecurityGroupId: !GetAtt [EC2SG, "GroupId"]
+      GroupId: !GetAtt [ELBSG, "GroupId"]
+
+  # 4. RDS SG
+  RDSSG:
     Type: AWS::RDS::DBSecurityGroup
     Properties:
       EC2VpcId: !Ref VPCId
+      GroupDescription: RDS Security Group
       DBSecurityGroupIngress:
-        EC2SecurityGroupName: !Ref EC2InSG
+          EC2SecurityGroupId: !GetAtt [EC2SG, "GroupId"]
 
 Outputs:
-  AdminInSGId:
-    Value: !GetAtt [AdminInSG, "GroupId"]
-  ELBInSGId:
-    Value: !GetAtt [ELBInSG, "GroupId"]
-  EC2InSGId:
-    Value: !GetAtt [EC2InSG, "GroupId"]
-  RDSInSGId:
-    Value: !Ref RDSInSG
+  AdminSGId:
+    Value: !GetAtt [AdminSG, "GroupId"]
+  ELBSGId:
+    Value: !GetAtt [ELBSG, "GroupId"]
+  EC2SGId:
+    Value: !GetAtt [EC2SG, "GroupId"]
+  RDSSGId:
+    Value: !GetAtt [EC2SG, "GroupId"]
