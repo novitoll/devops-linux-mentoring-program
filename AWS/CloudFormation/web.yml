@@ -50,9 +50,11 @@ Parameters:
     Type: String
     Description: RDS instance endpoint to connect
   DBUser:
+    NoEcho: true
     Type: String
     Description: DB User for the RDS instance to connect
   DBPassword:
+    NoEcho: true
     Type: String
     Description: Password of the DB user for the RDS instance to connect
 
@@ -97,21 +99,21 @@ Resources:
       SecurityGroups: !Ref SecurityGroups
       InstanceType: !Ref InstanceType
       UserData:
-        !Base64:
-          !Join:
+        Fn::Base64:
+          Fn::Join:
             - ""
             - ["#!/bin/bash",
             "yum install -y php php-mysql httpd",
             "cat >> /var/www/html/index.php << EOF",
             " <?php",
-            "   \$servername = \"", !Ref RDSEndpoint, "\";",
-            "   \$username = \"", !Ref DBUser, "\";",
-            "   \$password = \"", !Ref DBPassword, "\";",
-            "   \$conn = new mysqli(\$servername, \$username, \$password);",
-            "   if (\$conn->connect_error) {",
-            "       die(\"Connection failed: \" . \$conn->connect_error);",
+            "   $servername = \"", !Ref RDSEndpoint, "\";",
+            "   $username = \"", !Ref DBUser, "\";",
+            "   $password = \"", !Ref DBPassword, "\";",
+            "   $conn = new mysqli($servername, $username, $password);",
+            "   if ($conn->connect_error) {",
+            "       die(\"Connection failed: \" . $conn->connect_error);",
             "   }",
-            "   echo \"Connected successfully\";".
+            "   echo \"Connected successfully\";",
             " ?>",
             " EOF",
             "chmod 664 /var/www/html/index.php",
