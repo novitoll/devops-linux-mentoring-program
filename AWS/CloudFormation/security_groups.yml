@@ -29,6 +29,9 @@ Resources:
           CidrIp: !FindInMap [AllowedIPs, Offices, Astana]
           FromPort: 0
           ToPort: 65535
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-AdminSG']]
       VpcId: !Ref VPCId
 
   # 2. ELB SG
@@ -41,6 +44,9 @@ Resources:
           CidrIp: 0.0.0.0/0
           FromPort: 0
           ToPort: 65535
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-ELBSG']]
       VpcId: !Ref VPCId
 
   # 3. EC2 SG
@@ -49,6 +55,9 @@ Resources:
     Properties:
       GroupDescription: All TCP connection Security Group for EC2
       VpcId: !Ref VPCId
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-EC2SG']]
 
   InboundTcpRule:
     Type: AWS::EC2::SecurityGroupIngress
@@ -76,6 +85,9 @@ Resources:
       GroupDescription: RDS Security Group
       DBSecurityGroupIngress:
           EC2SecurityGroupId: !GetAtt [EC2SG, "GroupId"]
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-RDSSG']]
 
 Outputs:
   AdminSGId:

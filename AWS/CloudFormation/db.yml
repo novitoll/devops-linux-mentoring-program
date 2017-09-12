@@ -1,15 +1,86 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Template for creating VPC, Subnets for AZs
+Description: Template for RDS DB
 
-Mapping:
-  {}
+Mappings:
+  InstanceClasses:
+    db.t2.micro:
+      AllocatedStorage: 5
+    db.t2.small:
+      AllocatedStorage: 10
+
 
 Parameters:
-  {}
+  PrivateSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of private subnet Ids
+  DBInstanceClass:
+    Type: String
+    Description: Architecture of RDS instance
+    Default: db.t2.micro
+    AllowedValues: [db.t2.micro, db.t2.small]
+  DBName:
+    Type: String
+    Description: Name of the DB instance
+  DBUser:
+    NoEcho: true
+    Type: String
+    Description: Name of the DB instance user (Min 8 [a-zA-Z0-9] characters)
+    AllowedPattern: "^[a-zA-Z0-9]*$"
+    MinLength: 2
+    MaxLength: 64
+  DBPassword:
+    NoEcho: true
+    Type: String
+    Description: Password for the DB instance user (Min 8 [a-zA-Z0-9] characters)
+    AllowedPattern: "^[a-zA-Z0-9]*$"
+    MinLength: 8
+    MaxLength: 19
+  DBSlowQueryLog:
+    Type: String
+    Description: To create the slow query log, set to 1. The default is 0.
+    Default: 0
+    AllowedValues: [0, 1]
 
 Resources:
-  {}
+  # 1. DB Subnet
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: RDS SubnetGroup
+      SubnetIds: !Ref PrivateSubnets
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-DBSubnetGroup']]
+
+  # 2. DB Param Group
+  DBParamGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: Params for MySQL5.6 family DB instances
+      Parameters:
+        slow_query_log: !Ref DBSlowQueryLog
+      Family: MySQL5.6
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-DBParamGroup']]
+
+  # 3. DB MySQL instance
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !FindInMap [InstanceClasses, !Ref DBInstanceClass, AllocatedStorage]
+      DBName: !Ref DBName
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      Engine: MySQL
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPassword
+      DBInstanceClass: !Ref DBInstanceClass
+      DBParameterGroupName: !Ref DBParamGroup
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-DBInstance']]
 
 Outputs:
-  {}
+  RDSEndpoint:
+    Value: !GetAtt [DBInstance, "Endpoint.Address"]
