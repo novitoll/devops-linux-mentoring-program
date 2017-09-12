@@ -81,7 +81,8 @@ Resources:
       MasterUserPassword: !Ref DBPassword
       DBInstanceClass: !Ref DBInstanceClass
       DBParameterGroupName: !Ref DBParamGroup
-      DBSecurityGroups: !Ref SecurityGroups
+#      DBSecurityGroups: !Ref SecurityGroups
+      VPCSecurityGroups: !Ref SecurityGroups
       Tags:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-DBInstance']]

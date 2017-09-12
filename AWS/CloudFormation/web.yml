@@ -57,7 +57,6 @@ Parameters:
     Description: Password of the DB user for the RDS instance to connect
 
 
-
 Resources:
 
   # 1. Classic ELB
@@ -140,7 +139,5 @@ Resources:
         PauseTime: PT15M
         WaitOnResourceSignals: true
 
-
-
-Outputs:
+#Outputs:
 

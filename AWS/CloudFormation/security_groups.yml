@@ -96,5 +96,5 @@ Outputs:
     Value: !GetAtt [ELBSG, "GroupId"]
   EC2SGId:
     Value: !GetAtt [EC2SG, "GroupId"]
-  RDSSGId:
-    Value: !GetAtt [EC2SG, "GroupId"]
+  RDSSGName:
+    Value: !Ref RDSSG
