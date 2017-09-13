@@ -28,18 +28,18 @@ Parameters:
     Description: VPC Id
   PublicSubnets:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: List of public subnet Ids
+    Description: List of public subnet Ids for ELB
   PrivateSubnets:
     Type: List<AWS::EC2::Subnet::Id>
     Description: List of private subnet Ids
   SecurityGroups:
     Type: List<AWS::EC2::SecurityGroup::Id>
-    Description: List of security group Ids
+    Description: List of security group Ids for EC2 instances
   InstanceType:
     Type: String
     Description: EC2 instance type
-    AllowedValues: [t2.micro, t2.nano]
-    Default: t2.micro
+    AllowedValues: [t1.micro, t2.nano]
+    Default: t1.micro
   ASGInstanceCount:
     Type: Number
     Description: Number of EC2 instances to scale in ASG
@@ -66,9 +66,9 @@ Resources:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Description: Classic ELB
     Properties:
-      Subnets: !Ref PublicSubnets
+      Subnets: !Ref PublicSubnets  # instead of AZs
       CrossZone: true
-      LBCookieSticknessPolicy:
+      LBCookieStickinessPolicy:
         - PolicyName: CookieBasedPolicy
           CookieExpirationPeriod: 30
       Listeners:
@@ -98,6 +98,8 @@ Resources:
             - "Arch"
       SecurityGroups: !Ref SecurityGroups
       InstanceType: !Ref InstanceType
+      KeyName: !Ref SSHKeyPairName
+#      ClassicLinkVPCId: !Ref VPCId  # Must provide at least one classic link security group if a classic link VPC is provided.
       UserData:
         Fn::Base64:
           Fn::Join:
@@ -111,7 +113,7 @@ Resources:
             "   $password = \"", !Ref DBPassword, "\";",
             "   $conn = new mysqli($servername, $username, $password);",
             "   if ($conn->connect_error) {",
-            "       die(\"Connection failed: \" . $conn->connect_error);",
+            "       die(\"Connection failed: \" . $conn->connect_error);;",
             "   }",
             "   echo \"Connected successfully\";",
             " ?>",
@@ -131,15 +133,17 @@ Resources:
       DesiredCapacity: !Ref ASGInstanceCount
       LoadBalancerNames:
         - !Ref ClassicELB
-    CreationPolicy:
-      ResourceSignal:
-        Timeout: PT15M  # 15 minutes
-    UpdatePolicy:
-      AutoScalingRollingUpdate:
-        MinInstancesInService: 1
-        MaxBatchSize: 1
-        PauseTime: PT15M
-        WaitOnResourceSignals: true
+#    CreationPolicy:
+#      ResourceSignal:
+#        Timeout: PT15M  # 15 minutes
+#    UpdatePolicy:
+#      AutoScalingRollingUpdate:
+#        MinInstancesInService: 1
+#        MaxBatchSize: 1
+#        PauseTime: PT15M  # 15 minutes
+#        WaitOnResourceSignals: true
 
-#Outputs:
-
+Outputs:
+  WebsiteURL:
+    Value: !Join ["", ["http://", !GetAtt [ClassicELB, "DNSName"], "/index.php"]]
+    Description: Website for the end-user

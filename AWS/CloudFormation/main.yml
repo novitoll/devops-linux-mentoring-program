@@ -1,15 +1,141 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Template for creating VPC, Subnets for AZs
-
-Mapping:
-  {}
+Description: Main template to build stacks all together
 
 Parameters:
-  {}
+  # 1. networking params
+  NetworkingURL:
+    Type: String
+    Description: URL for the networking template
+    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+  CIDRRange:
+    Description: VPCCIDR Range (will be a /16 block)
+    Type: String
+    Default: 10.251.0.0
+    AllowedValues: [10.250.0.0, 10.251.0.0]
+
+  # 2. security params
+  SecurityGroupsURL:
+    Type: String
+    Description: URL for the networking template
+    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+
+  # 3. database params
+  DatabaseURL:
+    Type: String
+    Description: URL for the networking template
+    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+  DBInstanceClass:
+    Type: String
+    Description: Architecture of RDS instance
+    Default: db.t2.micro
+    AllowedValues: [db.t2.micro, db.t2.small]
+  DBName:
+    Type: String
+    Description: Name of the DB instance
+  DBUser:
+    NoEcho: true
+    Type: String
+    Description: Name of the DB instance user (Min 8 [a-zA-Z0-9] characters)
+    AllowedPattern: "^[a-zA-Z0-9]*$"
+    MinLength: 2
+    MaxLength: 64
+  DBPassword:
+    NoEcho: true
+    Type: String
+    Description: Password for the DB instance user (Min 8 [a-zA-Z0-9] characters)
+    AllowedPattern: "^[a-zA-Z0-9]*$"
+    MinLength: 8
+    MaxLength: 19
+  DBSlowQueryLog:
+    Type: String
+    Description: To create the slow query log, set to 1. The default is 0.
+    Default: 0
+    AllowedValues: [0, 1]
+
+  # 4. web params
+  WebURL:
+    Type: String
+    Description: URL for the networking template
+    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+  InstanceType:
+    Type: String
+    Description: EC2 instance type
+    AllowedValues: [t1.micro, t2.nano]
+    Default: t1.micro
+  ASGInstanceCount:
+    Type: Number
+    Description: Number of EC2 instances to scale in ASG
+  SSHKeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: SSH KeyPair name
+
 
 Resources:
-  {}
+  Networking:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref NetworkingURL
+      Parameters:
+        CIDRRange: !Ref CIDRRange
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-Networking']]
+
+  SecurityGroups:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref SecurityGroupsURL
+      Parameters:
+        VPCId: !GetAtt [Networking, "Outputs.VPCID"]
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-SecurityGroups']]
+
+  Database:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref SecurityGroupsURL
+      Parameters:
+        PrivateSubnets: !Join [",", [!GetAtt [Networking, "Outputs.SubnetPrivateAZ1"],
+                                     !GetAtt [Networking, "Outputs.SubnetPrivateAZ2"]]]
+        DBInstanceClass: !Ref DBInstanceClass
+        DBName: !Ref DBName
+        DBUser: !Ref DBUser
+        DBPassword: !Ref DBPassword
+        DBSlowQueryLog: !Ref DBSlowQueryLog
+        SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
+                                     !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
+                                     !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-Database']]
+
+  Web:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref WebURL
+      Parameters:
+        VPCId: !GetAtt [Networking, "Outputs.VPCID"]
+        PublicSubnets: !Join [",", [!GetAtt [Networking, "Outputs.SubnetPublicAZ1"],
+                                     !GetAtt [Networking, "Outputs.SubnetPublicAZ2"]]]
+        PrivateSubnets: !Join [",", [!GetAtt [Networking, "Outputs.SubnetPrivateAZ1"],
+                                     !GetAtt [Networking, "Outputs.SubnetPrivateAZ2"]]]
+        SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
+                                     !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
+                                     !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
+        InstanceType: !Ref InstanceType
+        ASGInstanceCount: !Ref ASGInstanceCount
+        SSHKeyPairName: !Ref SSHKeyPairName
+        RDSEndpoint: !GetAtt [Networking, "Outputs.RDSEndpoint"]
+        DBUser: !Ref DBUser
+        DBPassword: !Ref DBPassword
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-Web']]
 
 Outputs:
-  {}
+  URL:
+    Value: !GetAtt [Web, "Outputs.WebsiteURL"]
+
+
