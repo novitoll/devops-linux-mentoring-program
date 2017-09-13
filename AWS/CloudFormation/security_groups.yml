@@ -89,6 +89,21 @@ Resources:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-RDSSG']]
 
+  # 4.1 Additional security group for MySQL 3306 TCP port
+  RDS4EC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: All 3306 TCP connection Security Group for EC2
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          FromPort: 3306
+          ToPort: 3306
+      Tags:
+        - Key: Name
+          Value: !Join ["", [!Ref 'AWS::StackName', '-RDS4EC2SG']]
+
 Outputs:
   AdminSGId:
     Value: !GetAtt [AdminSG, "GroupId"]
@@ -98,3 +113,5 @@ Outputs:
     Value: !GetAtt [EC2SG, "GroupId"]
   RDSSGName:
     Value: !Ref RDSSG
+  RDS4EC2SGId:
+    Value: !GetAtt [RDS4EC2SG, "GroupId"]

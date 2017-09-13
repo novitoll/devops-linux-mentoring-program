@@ -7,7 +7,7 @@ Parameters:
   NetworkingURL:
     Type: String
     Description: URL for the networking template
-    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+    Default: https://s3.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/networking.yml
   CIDRRange:
     Description: VPCCIDR Range (will be a /16 block)
     Type: String
@@ -18,13 +18,13 @@ Parameters:
   SecurityGroupsURL:
     Type: String
     Description: URL for the networking template
-    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+    Default: https://s3.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/security_groups.yml
 
   # 3. database params
   DatabaseURL:
     Type: String
     Description: URL for the networking template
-    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+    Default: https://s3.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/db.yml
   DBInstanceClass:
     Type: String
     Description: Architecture of RDS instance
@@ -57,7 +57,7 @@ Parameters:
   WebURL:
     Type: String
     Description: URL for the networking template
-    Default: https://s3-external-1.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/2017256ZLz-web.yml
+    Default: https://s3.amazonaws.com/cf-templates-9ybl3rilvq15-us-east-1/web.yml
   InstanceType:
     Type: String
     Description: EC2 instance type
@@ -65,7 +65,9 @@ Parameters:
     Default: t1.micro
   ASGInstanceCount:
     Type: Number
-    Description: Number of EC2 instances to scale in ASG
+    MaxValue: 2
+    MinValue: 1
+    Description: Number of EC2 instances to scale in ASG (max. 2)
   SSHKeyPairName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: SSH KeyPair name
@@ -95,7 +97,7 @@ Resources:
   Database:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Ref SecurityGroupsURL
+      TemplateURL: !Ref DatabaseURL
       Parameters:
         PrivateSubnets: !Join [",", [!GetAtt [Networking, "Outputs.SubnetPrivateAZ1"],
                                      !GetAtt [Networking, "Outputs.SubnetPrivateAZ2"]]]
@@ -106,6 +108,7 @@ Resources:
         DBSlowQueryLog: !Ref DBSlowQueryLog
         SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
                                      !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
+                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SG"],
                                      !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
       Tags:
         - Key: Name
@@ -123,11 +126,12 @@ Resources:
                                      !GetAtt [Networking, "Outputs.SubnetPrivateAZ2"]]]
         SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
                                      !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
+                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SG"],
                                      !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
         InstanceType: !Ref InstanceType
         ASGInstanceCount: !Ref ASGInstanceCount
         SSHKeyPairName: !Ref SSHKeyPairName
-        RDSEndpoint: !GetAtt [Networking, "Outputs.RDSEndpoint"]
+        RDSEndpoint: !GetAtt [Database, "Outputs.RDSEndpoint"]
         DBUser: !Ref DBUser
         DBPassword: !Ref DBPassword
       Tags:

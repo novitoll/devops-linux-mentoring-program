@@ -68,6 +68,7 @@ Resources:
     Properties:
       Subnets: !Ref PublicSubnets  # instead of AZs
       CrossZone: true
+      SecurityGroups: !Ref SecurityGroups
       LBCookieStickinessPolicy:
         - PolicyName: CookieBasedPolicy
           CookieExpirationPeriod: 30
@@ -75,9 +76,9 @@ Resources:
         - LoadBalancerPort: 80
           InstancePort: 80
           Protocol: HTTP
-          PolicyNames: [ CookieBasedPolicy ]
+          PolicyNames: [CookieBasedPolicy]
       HealthCheck:
-        Target: HTTP:8080/index.php
+        Target: HTTP:80/index.php
         HealthyThreshold: 2
         UnhealthyThreshold: 5
         Interval: 10
@@ -99,7 +100,6 @@ Resources:
       SecurityGroups: !Ref SecurityGroups
       InstanceType: !Ref InstanceType
       KeyName: !Ref SSHKeyPairName
-#      ClassicLinkVPCId: !Ref VPCId  # Must provide at least one classic link security group if a classic link VPC is provided.
       UserData:
         Fn::Base64:
           Fn::Join:
@@ -133,15 +133,6 @@ Resources:
       DesiredCapacity: !Ref ASGInstanceCount
       LoadBalancerNames:
         - !Ref ClassicELB
-#    CreationPolicy:
-#      ResourceSignal:
-#        Timeout: PT15M  # 15 minutes
-#    UpdatePolicy:
-#      AutoScalingRollingUpdate:
-#        MinInstancesInService: 1
-#        MaxBatchSize: 1
-#        PauseTime: PT15M  # 15 minutes
-#        WaitOnResourceSignals: true
 
 Outputs:
   WebsiteURL:
