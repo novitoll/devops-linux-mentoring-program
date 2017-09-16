@@ -108,7 +108,7 @@ Resources:
         DBSlowQueryLog: !Ref DBSlowQueryLog
         SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
                                      !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SG"],
+                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SGId"],
                                      !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
       Tags:
         - Key: Name
@@ -126,7 +126,7 @@ Resources:
                                      !GetAtt [Networking, "Outputs.SubnetPrivateAZ2"]]]
         SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
                                      !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SG"],
+                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SGId"],
                                      !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
         InstanceType: !Ref InstanceType
         ASGInstanceCount: !Ref ASGInstanceCount

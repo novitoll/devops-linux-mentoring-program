@@ -102,24 +102,37 @@ Resources:
       KeyName: !Ref SSHKeyPairName
       UserData:
         Fn::Base64:
-          Fn::Join:
-            - ""
-            - ["#!/bin/bash",
-            "yum install -y php php-mysql httpd",
-            "cat >> /var/www/html/index.php << EOF",
-            " <?php",
-            "   $servername = \"", !Ref RDSEndpoint, "\";",
-            "   $username = \"", !Ref DBUser, "\";",
-            "   $password = \"", !Ref DBPassword, "\";",
-            "   $conn = new mysqli($servername, $username, $password);",
-            "   if ($conn->connect_error) {",
-            "       die(\"Connection failed: \" . $conn->connect_error);;",
-            "   }",
-            "   echo \"Connected successfully\";",
-            " ?>",
-            " EOF",
-            "chmod 664 /var/www/html/index.php",
-            "chown apache:apache /var/www/html/index.php"]
+          Fn::Sub:
+            - |
+              #!/bin/bash
+              yum install -y php php-mysql httpd
+              service httpd start
+              cat >> /var/www/html/index.php << EOF
+              <?php
+              ${KEY_SERVER} = "${DB_SERVER}";
+              ${KEY_USER} = "${DB_USER}";
+              ${KEY_PASS} = "${DB_PASS}";
+              ${KEY_HOST} = gethostname();
+              echo "Connected to ${KEY_HOST}";
+              echo "    ";
+              ${KEY_CONN} = new mysqli(${KEY_SERVER}, ${KEY_USER}, ${KEY_PASS});
+              if (${KEY_CONN}->connect_error) {
+              die("Connection failed: ".${KEY_CONN}->connect_error);
+              }
+              echo "Connected successfully";
+              ?>
+              EOF
+
+              chmod 664 /var/www/html/index.php
+              chown apache:apache /var/www/html/index.php
+            - { KEY_SERVER: "\\$servername",
+                KEY_USER: "\\$username",
+                KEY_PASS: "\\$password",
+                KEY_HOST: "\\$hostname",
+                KEY_CONN: "\\$conn",
+                DB_SERVER: !Ref RDSEndpoint,
+                DB_USER: !Ref DBUser,
+                DB_PASS: !Ref DBPassword }
 
   # 3. Auto-Scaling Group
   ASG:

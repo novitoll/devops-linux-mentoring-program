@@ -77,19 +77,7 @@ Resources:
       DestinationSecurityGroupId: !GetAtt [EC2SG, "GroupId"]
       GroupId: !GetAtt [ELBSG, "GroupId"]
 
-  # 4. RDS SG
-  RDSSG:
-    Type: AWS::RDS::DBSecurityGroup
-    Properties:
-      EC2VpcId: !Ref VPCId
-      GroupDescription: RDS Security Group
-      DBSecurityGroupIngress:
-          EC2SecurityGroupId: !GetAtt [EC2SG, "GroupId"]
-      Tags:
-        - Key: Name
-          Value: !Join ["", [!Ref 'AWS::StackName', '-RDSSG']]
-
-  # 4.1 Additional security group for MySQL 3306 TCP port
+  # 4. Security group for MySQL 3306 TCP port
   RDS4EC2SG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -111,7 +99,5 @@ Outputs:
     Value: !GetAtt [ELBSG, "GroupId"]
   EC2SGId:
     Value: !GetAtt [EC2SG, "GroupId"]
-  RDSSGName:
-    Value: !Ref RDSSG
   RDS4EC2SGId:
     Value: !GetAtt [RDS4EC2SG, "GroupId"]
