@@ -42,8 +42,8 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: tcp
           CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 65535
+          FromPort: 80
+          ToPort: 80
       Tags:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-ELBSG']]
@@ -63,8 +63,8 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       IpProtocol: tcp
-      FromPort: 0
-      ToPort: 65535
+      FromPort: 80
+      ToPort: 80
       SourceSecurityGroupId: !GetAtt [ELBSG, "GroupId"]
       GroupId: !GetAtt [EC2SG, "GroupId"]
 
@@ -85,9 +85,9 @@ Resources:
       VpcId: !Ref VPCId
       SecurityGroupIngress:
         - IpProtocol: tcp
-          CidrIp: 0.0.0.0/0
           FromPort: 3306
           ToPort: 3306
+          SourceSecurityGroupId: !GetAtt [EC2SG, "GroupId"]
       Tags:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-RDS4EC2SG']]

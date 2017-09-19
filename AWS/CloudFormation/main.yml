@@ -61,8 +61,8 @@ Parameters:
   InstanceType:
     Type: String
     Description: EC2 instance type
-    AllowedValues: [t1.micro, t2.nano]
-    Default: t1.micro
+    AllowedValues: ["t1.micro", "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium"]
+    Default: t2.micro
   ASGInstanceCount:
     Type: Number
     MaxValue: 2
@@ -107,9 +107,7 @@ Resources:
         DBPassword: !Ref DBPassword
         DBSlowQueryLog: !Ref DBSlowQueryLog
         SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
+                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SGId"]]]
       Tags:
         - Key: Name
           Value: !Join ["", [!Ref 'AWS::StackName', '-Database']]
@@ -124,10 +122,10 @@ Resources:
                                      !GetAtt [Networking, "Outputs.SubnetPublicAZ2"]]]
         PrivateSubnets: !Join [",", [!GetAtt [Networking, "Outputs.SubnetPrivateAZ1"],
                                      !GetAtt [Networking, "Outputs.SubnetPrivateAZ2"]]]
-        SecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.ELBSGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.RDS4EC2SGId"],
-                                     !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
+        PrivateSecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
+                                            !GetAtt [SecurityGroups, "Outputs.EC2SGId"]]]
+        PublicSecurityGroups: !Join [",", [!GetAtt [SecurityGroups, "Outputs.AdminSGId"],
+                                           !GetAtt [SecurityGroups, "Outputs.ELBSGId"]]]
         InstanceType: !Ref InstanceType
         ASGInstanceCount: !Ref ASGInstanceCount
         SSHKeyPairName: !Ref SSHKeyPairName
